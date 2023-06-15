@@ -12,9 +12,11 @@ keyD = 68
 keyS = 83
 keyEnter = 257
 
+require("/os/global/variables")
+
 function printHeader()
-    printAtPos(1, 1, "fireOs")
-    printAtPos(1, 2, "Version: Alpha 1.0")
+    printAtPos(1, 1, osName)
+    printAtPos(1, 2, "Version: "..osVersion)
 end
 
 function readAtPos(xPos, yPos)

@@ -1,18 +1,18 @@
-term.clear()
+
 os.pullEvent = os.pullEventRaw
-local menuSelectedOption = 1
-local clockTimerDelay = 0.05
-local clockTimer = os.startTimer(clockTimerDelay)
-local switch = true
-local myProgramsOptions = {"Floppy Disk Manager", " ", " ", "Exit"}
+menuSelectedOption = 1
+clockTimerDelay = 0.05
+clockTimer = os.startTimer(clockTimerDelay)
+switch = true
+myProgramsOptions = {"Floppy Disk Manager", " ", " ", "Exit"}
 
 require("menutools")
+require("global/variables")
 
 local function drawMyProgramsList(opt)
    
 
-    printAtPos(1, 1, "fireOs")
-    printAtPos(1, 2, "Version: Alpha 1.0")
+    printHeader()
     
     printCenteredY(yMid -1, "Programs list")
     printCenteredY(yMid, " ")
@@ -22,13 +22,15 @@ local function drawMyProgramsList(opt)
     end
 end
 
+term.clear()
+
 while switch == true do
 
     local time = os.time()
     local formattedTime = textutils.formatTime(time, false)
     local date = os.date()
     
-    events = {os.pullEvent()}
+    local events = {os.pullEvent()}
     if events[1] == "timer" then
         if events[2] == clockTimer then
             drawMyProgramsList(menuSelectedOption)
@@ -43,7 +45,7 @@ while switch == true do
         if events[2] == keyEnter then
             if menuSelectedOption == 1 then
                 resetScreen()
-                shell.run("fireOs/myprograms/diskTool.lua")
+                shell.run("os/myprograms/diskTool.lua")
                 break
 
             elseif menuSelectedOption == 2 then
@@ -54,7 +56,7 @@ while switch == true do
 
             elseif menuSelectedOption == 4 then
                 resetScreen()
-                shell.run("fireOs/mainmenu.lua")
+                shell.run("os/mainmenu.lua")
                 break
                 
             end

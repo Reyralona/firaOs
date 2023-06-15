@@ -1,1 +1,1 @@
-shell.run("fireOs/mainmenu.lua")
+shell.run("os/mainmenu.lua")

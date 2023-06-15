@@ -1,38 +1,4 @@
 
-require("./fireOs/menutools")
-
-peripheralPositions = {"right", "left", "bottom", "top"}
-diskToolsMenuOptions = {"Eject Disk",
-                        "Set Disk Label",
-                        "Get Disk Label",
-                        "Get Disk ID",
-                        "Get Mount Path",
-                        "Copy to disk path",
-                        "Copy disk to system",
-                        "Print disk",
-                        "Delete from disk",
-                        "Play audio",
-                        "Stop audio",
-                        "Exit"}
-os.pullEvent = os.pullEventRaw
-
--- checks for disk drive in all positions
-for i=1, 4 do
-    
-    if peripheral.isPresent(peripheralPositions[i]) == true then
-        hasDrive = true
-        drive = peripheral.wrap(peripheralPositions[i])
-        statusMessage = 'Drive at position: '..peripheralPositions[i]
-        break
-    end
-    hasDrive = false
-end
-
-
-
-local menuSelectedOption = 1
-switch = true
-
 local function drawDiskToolsMenu(opt)
     
     printHeader()
@@ -51,24 +17,15 @@ local function drawDiskToolsMenu(opt)
             printIfSelected(index, yMid + offset + 1, option, opt)
         end
     end
-    -- printIfSelected(1, yMid - 2, "Eject Disk")
-    -- printIfSelected(2, yMid - 1, "Set Disk Label")
-    -- printIfSelected(3, yMid,     "Get Disk Label")
-    -- printIfSelected(4, yMid + 1, "Get Disk ID")
-    -- printIfSelected(5, yMid + 2, "Get Mount Path")
-    -- printIfSelected(6, yMid + 3, "Has data")
-    -- printIfSelected(7, yMid + 4, "Has audio")
-    -- printIfSelected(8, yMid + 5, "Play audio")
-    -- printIfSelected(9, yMid + 6, "Stop audio")
-    
 end
 
-function hasDisk()
+function diskType()
     if drive.hasData() then
-        return true
+        return "floppy"
+    elseif drive.hasAudio() then
+        return "musicdisk"
     else
         updateStatusMessage("No disk in drive!")
-        return false
     end
 end
 
@@ -80,15 +37,15 @@ function updateStatusMessage(message)
     term.setTextColor(colors.white)
 end
 
-local function optionEjectDisk()
-    if hasDisk() then
+function optionEjectDisk()
+    if diskType() == "floppy" or diskType() == "musicdisk" then
         drive.ejectDisk()
         updateStatusMessage("Disk Ejected!")
     end
 end
 
-local function optionSetDiskLabel()
-    if hasDisk() then
+function optionSetDiskLabel()
+    if diskType() == "floppy" then
         updateStatusMessage("Insert Disk Label:")
         diskLabel = readAtPos(25, 2)
         if diskLabel ~= "" then
@@ -97,11 +54,13 @@ local function optionSetDiskLabel()
         else
             updateStatusMessage("Exited.")
         end
+    elseif diskType() == "musicdisk" then
+        updateStatusMessage("Disk is not floppy disk!")
     end
 end
 
-local function optionGetDiskLabel()
-    if hasDisk() then
+function optionGetDiskLabel()
+    if diskType() then
         if drive.getDiskLabel() ~= nil then
             updateStatusMessage("Disk Label: "..drive.getDiskLabel())
         else
@@ -110,20 +69,24 @@ local function optionGetDiskLabel()
     end
 end
 
-local function optionGetDiskId()
-    if hasDisk() then
+function optionGetDiskId()
+    if diskType() == "floppy" then
         updateStatusMessage("Disk Id: "..drive.getDiskID())
+    elseif diskType() == "musicdisk" then
+        updateStatusMessage("Music disks have no ID!")
     end
 end
 
-local function optionGetMountPath()
-    if hasDisk() then
+function optionGetMountPath()
+    if diskType() == "floppy" then
         updateStatusMessage("Mount Path: "..drive.getMountPath())
+    elseif diskType() == "musicdisk" then
+        updateStatusMessage("Disk is not floppy!")
     end
 end
 
-local function optionCopyToDiskPath()
-    if hasDisk() then
+function optionCopyToDiskPath()
+    if diskType() == "floppy" then
         updateStatusMessage("Insert Source to Copy:")
         source = readAtPos(25, 2)
         if source ~= "" then
@@ -132,11 +95,13 @@ local function optionCopyToDiskPath()
         else
             updateStatusMessage("Exited.")
         end
+    elseif diskType() == "musicdisk" then
+        updateStatusMessage("Disk is not floppy!")
     end
 end
 
-local function optionCopyDiskToFolder()
-    if hasDisk() then
+function optionCopyDiskToFolder()
+    if diskType() == "floppy" then
         updateStatusMessage("Insert Destination:")
         source = readAtPos(25, 2)
         if source ~= "" then
@@ -145,11 +110,13 @@ local function optionCopyDiskToFolder()
         else
             updateStatusMessage("Exited.")
         end
+    elseif diskType() == "musicdisk" then
+        updateStatusMessage("Disk is not floppy!")
     end
 end
 
-local function optionPrintDiskContent()
-    if hasDisk() then
+function optionPrintDiskContent()
+    if diskType()  == "floppy" then
         resetScreen()
         term.setCursorPos(1, 1)
         term.setTextColor(colors.blue)
@@ -158,11 +125,13 @@ local function optionPrintDiskContent()
         term.setCursorPos(1, 2)
         shell.run("ls", drive.getMountPath())
         readAtPos(1, 19)
+    elseif diskType() == "musicdisk" then
+        updateStatusMessage("Disk is not floppy!")
     end
 end
 
-local function optionDeleteFromDisk()
-    if hasDisk() then
+function optionDeleteFromDisk()
+    if diskType() == "floppy" then
         updateStatusMessage("What to delete: ")
         target = readAtPos(25, 2)
         if target ~= "" then
@@ -171,23 +140,75 @@ local function optionDeleteFromDisk()
         else
             updateStatusMessage("Exited.")
         end
+    elseif diskType() == "musicdisk" then
+        updateStatusMessage("Disk is not floppy!")
     end
 end
 
-local function optionPlayAudio()
-    if hasDisk() then
+function optionPlayAudio()
+    if diskType() == "musicdisk" then
         updateStatusMessage("Playing audio.")
         drive.playAudio()
+    elseif diskType() == "floppy" then
+        updateStatusMessage("Cannot play floppy disk!")
     end
 end
 
-local function optionStopAudio()
-    if hasDisk() then
+function optionStopAudio()
+    if diskType() == "musicdisk" then
         updateStatusMessage("Audio stopped.")
         drive.stopAudio()
+    elseif diskType() == "floppy" then
+        updateStatusMessage("Cannot play floppy disk!")
     end
 end
 
+
+require("/os/global/variables")
+
+require("/os/menutools")
+
+menuSelectedOption = 1
+switch = true
+peripheralPositions = {"right", "left", "bottom", "top"}
+diskToolsMenuOptions = {"Eject Disk",
+                        "Set Disk Label",
+                        "Get Disk Label",
+                        "Get Disk ID",
+                        "Get Mount Path",
+                        "Copy to disk path",
+                        "Copy disk to system",
+                        "Print disk",
+                        "Delete from disk",
+                        "Play audio",
+                        "Stop audio",
+                        "Exit"}
+os.pullEvent = os.pullEventRaw
+
+-- checks for disk drive
+if peripheral.find("drive") ~= nil then
+    for i=1, 4 do
+        if peripheral.getType(peripheralPositions[i]) == "drive" then
+            hasDrive = true
+            updateStatusMessage('Drive at position: '..peripheralPositions[i])
+            drive = peripheral.wrap(peripheralPositions[i])
+        end
+    end
+    
+    peripheralsList = peripheral.getNames()
+    for i=1, table.getn(peripheralsList) do
+        isDrive, _ = string.find(peripheralsList[i], "drive")
+        if isDrive == 1 then
+            hasDrive = true
+            updateStatusMessage('Drive connected v/ network!')
+            drive = peripheral.wrap(peripheralsList[i])
+        end
+    end
+
+else
+    updateStatusMessage("Not found!")
+    hasDrive = false
+end
 
 
 resetScreen()
@@ -197,8 +218,8 @@ if hasDrive == false then
         15, 8,
         "No disk drive available!")
     term.setTextColor(colors.white)
-    sleep(1)
-    shell.run("myprograms")
+    readAtPos(1, 19)
+    shell.run("os/myprograms")
  
 else
     printAtPos(
@@ -270,7 +291,7 @@ while switch == true do
             
             elseif menuSelectedOption == 12 then
                 resetScreen()
-                shell.run("fireOs/myprograms.lua")
+                shell.run("os/myprograms.lua")
                 break
             end
         --GO UP MENU

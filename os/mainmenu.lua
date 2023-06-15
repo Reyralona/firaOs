@@ -1,21 +1,19 @@
-term.clear()
 os.pullEvent = os.pullEventRaw
-local menuSelectedOption = 1
-local clockTimerDelay = 0.05
-local clockTimer = os.startTimer(clockTimerDelay)
-local switch = true
-local menuOptions = {"Lua Shell",
-                    "Programs",
-                    "Uninstall",
-                    "Reboot"}
+menuSelectedOption = 1
+clockTimerDelay = 0.05
+clockTimer = os.startTimer(clockTimerDelay)
+switch = true
+menuOptions = {"Lua Shell",
+                "Programs",
+                "Uninstall",
+                "Reboot"}
 
 require("menutools")
+require("global/variables")
 
-local function drawMainMenu(opt)
+function drawMainMenu(opt)
     
-
-    printAtPos(1, 1, "fireOs")
-    printAtPos(1, 2, "Version: Alpha 1.0")
+    printHeader()
     
     printCenteredY(yMid -1, "Start Menu")
     printCenteredY(yMid, " ")
@@ -23,12 +21,9 @@ local function drawMainMenu(opt)
     for index = 1, table.getn(menuOptions) do
         printIfSelected(index, yMid + index, menuOptions[index], opt)
     end
-
-    -- printIfSelected(1, yMid + 1,   "Lua Shell")
-    -- printIfSelected(2, yMid + 2, "Programs")
-    -- printIfSelected(3, yMid + 3, "Uninstall")
-    -- printIfSelected(4, yMid + 4, "Reboot")
 end
+
+term.clear()
 
 while switch == true do
 
@@ -36,7 +31,7 @@ while switch == true do
     local formattedTime = textutils.formatTime(time, false)
     local date = os.date()
     
-    events = {os.pullEvent()}
+    local events = {os.pullEvent()}
     if events[1] == "timer" then
         if events[2] == clockTimer then
             drawMainMenu(menuSelectedOption)
@@ -54,12 +49,12 @@ while switch == true do
                 
             elseif menuSelectedOption == 2 then
                 resetScreen()
-                shell.run("fireOs/myprograms.lua")
+                shell.run("os/myprograms.lua")
                 break
 
             elseif menuSelectedOption == 3 then
                 resetScreen()
-                shell.run("fireOs/uninstall.lua")
+                shell.run("os/uninstall.lua")
                 break
 
             elseif menuSelectedOption == 4 then
